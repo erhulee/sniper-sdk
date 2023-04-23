@@ -41,6 +41,7 @@ webmonitor.start();
 - 插件机制：所有特性都可以自定义选择
 - 支持的 Web 框架：React
 - 日志去除重复
+
 TODO:
 - Memory 页面内存
 - 首屏资源瀑布图
