@@ -14,7 +14,7 @@ const DEFAULT_ENDPOINT = "https://bdul0j.laf.dev/logger"
 type WebSenderType = "xhr" | "beacon";
 type SenderMethod = "post" | "get"
 type SenderOption = {
-    threshold?: number,
+
     endpoint?: string
 } & ({
     method: "post",
@@ -50,8 +50,10 @@ class WebMonitor extends Monitor {
     rrwebStack: any[] = [];
 
     nativeXHRSend?: Function
+
+    threshold: number
     // 插件
-    // plugins: Plugin[] = []
+    plugins: Plugin[] = []
     // 插件会重写，此处只是作为类型定义
     trackLog?: (...arg: any[]) => void;
     trackJSError(error: Error) {
@@ -68,54 +70,58 @@ class WebMonitor extends Monitor {
             sample_rate?: number
             plugins?: Plugin[]
             waitUidFilled?: boolean
+            threshold?: number
         } & SenderOption
     ) {
         super(options.appid, options.endpoint || DEFAULT_ENDPOINT, options.method, options.sample_rate);
-        const { method, senderType, threshold = 1, endpoint, longtask_time = DEFAULT_LONGTASK_TIME, waitUidFilled = false } = options;
+        const { method, senderType, endpoint, longtask_time = DEFAULT_LONGTASK_TIME, waitUidFilled = false, threshold = 10 } = options;
+        this.threshold = threshold
         this.waitUidFilled = waitUidFilled
         this.longtask_time = longtask_time
         getDid().then(did => this.fingerprint = did)
-        this.initSender(senderType, method, endpoint || DEFAULT_ENDPOINT, threshold);
+        this.initSender(senderType, method, endpoint || DEFAULT_ENDPOINT);
         this.initPlugins(options.plugins);
     }
 
     // 频控 / 检查 / uid
-    // data 不许是 array，呜呜呜
-    send(data: any) {
+    send<T = any>(data: T | T[]) {
+        if (Array.isArray(data)) {
+            data.forEach(item => {
+                this.send(item)
+            })
+            return;
+        }
+
         if (data == null) return;
         // 暂定频控
         if (Math.random() > this.sample_rate) return;
+
         // hash去除重复
         // const hash_key = encode(data);
-        // console.log("hash keyP", hash_key)
         // if (this.hash_set.has(hash_key)) return;
         // this.hash_set.add(hash_key);
-        // did 检查
-        // did 检查合法
-        if (!this.fingerprint || this.fingerprint !== "unknown") {
-            if (!this.waitUidFilled) {
-                this.senderInstance?.post(data);
-            } else {
-                const hasUid = Boolean(this.uid) || this.uid !== "unknown"
-                if (hasUid) {
-                    const postData = waitLoggerQueue.map(log => ({ ...log, uid: this.uid })).concat(data);
-                    this.senderInstance?.post(postData);
-                } else {
-                    waitLoggerQueue.push(data);
-                }
-            }
-            // did 不合法 -> 暂存
-        } else {
-            waitLoggerQueue.push(data)
-        }
+        //TODO: 浏览器指纹在某些情况下不可以获取, did 检查还需要吗
+
+        waitLoggerQueue.push(data);
+        // 需要等待 uid 填充
+        if (this.waitUidFilled && (!this.uid || this.uid == "unknown")) return;
+
+        // 数据量还不够
+        if (waitLoggerQueue.length < this.threshold) return;
+
+        // 真正的发送
+        const postData = waitLoggerQueue.map(log => ({ ...log, uid: this.uid }));
+        this.senderInstance?.post(postData);
+
+
     }
 
 
-    initSender(senderType: WebSenderType, senderMethod: SenderMethod, endpoint: string, threshold: number) {
+    initSender(senderType: WebSenderType, senderMethod: SenderMethod, endpoint: string) {
         if (senderType == "beacon") {
             this.senderInstance = new BeaconSender(endpoint, this);
         } else {
-            this.senderInstance = new XHRSender<(any & { appid: string })>(endpoint, this, senderMethod, threshold)
+            this.senderInstance = new XHRSender<(any & { appid: string })>(endpoint, this, senderMethod)
         }
     }
 
