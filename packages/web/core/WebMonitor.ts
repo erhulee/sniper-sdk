@@ -97,9 +97,9 @@ class WebMonitor extends Monitor {
         if (Math.random() > this.sample_rate) return;
 
         // hash去除重复
-        // const hash_key = encode(data);
-        // if (this.hash_set.has(hash_key)) return;
-        // this.hash_set.add(hash_key);
+        const hash_key = encode(JSON.stringify(data));
+        if (this.hash_set.has(hash_key)) return;
+        this.hash_set.add(hash_key);
         //TODO: 浏览器指纹在某些情况下不可以获取, did 检查还需要吗
 
         waitLoggerQueue.push(data);

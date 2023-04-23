@@ -38,35 +38,33 @@ export class HTTPPlugin implements Plugin {
             instance.nativeXHRSend.apply(self, arg)
         }
 
-        /* !!: fetch 劫持 */
-        // 被认为是 fakeWindows 禁止劫持 -> 只能在 Performance API 上下功夫啦
-        // if (!window.fetch) return;
-        // this.nativeFetch = fetch
-        // const that = this;
-
-        // window.fetch = function (...arg) {
-        //     const promise = that.nativeFetch(...arg);
-        //     const startTime = Date.now();
-        //     promise.then((response: Response) => {
-        //         if (response.ok) {
-        //             // 测速
-        //             const duration = Date.now().valueOf() - startTime.valueOf();
-        //             const url = response.url;
-        //             const logger = new HTTPPerformanceLogger(duration, url);
-        //             that.monitor.send(logger);
-        //         } else {
-        //             //TODO 观察怎么拿到需要的信息
-        //             const url = response.url;
-        //             const statusCode = response.status;
-        //             const logger = new HTTPErrorLogger(statusCode, url);
-        //             that.monitor.send(logger)
-        //         }
-        //     }, (error: any) => {
-        //         // 似乎不会出错
-
-        //     })
-        //     return promise;
-        // }
+        /*  fetch 劫持 */
+        if (!window.fetch) return;
+        this.nativeFetch = fetch.bind(window);
+        const that = this;
+        window.fetch = function (...arg) {
+            const promise = that.nativeFetch(...arg);
+            const startTime = Date.now();
+            promise.then((response: Response) => {
+                if (response.ok) {
+                    // 测速
+                    const duration = Date.now().valueOf() - startTime.valueOf();
+                    const url = response.url;
+                    const logger = new HTTPPerformanceLogger(duration, url);
+                    that.monitor.send(logger);
+                } else {
+                    //TODO 观察怎么拿到需要的信息
+                    const url = response.url;
+                    const statusCode = response.status;
+                    const logger = new HTTPErrorLogger(statusCode, url);
+                    that.monitor.send(logger)
+                }
+            }, (error: any) => {
+                // 似乎不会出错
+                console.log("error:", error)
+            })
+            return promise;
+        }
     }
     unload() {
         XMLHttpRequest.prototype.send = this.nativeXHRSend
