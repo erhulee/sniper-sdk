@@ -44,13 +44,11 @@ class WebMonitor extends Monitor {
     uid?: string
     // 发送器实例 sender 处理存储/压缩之类的具体逻辑，plugin 在发送数据的时候，会将后续控制权交给 sender 
     senderInstance?: Sender<WebMonitor>;
-    // 事件栈，可能有用~ -> 统计页面跳出率
-    eventStack: Array<{ pathName: string, event: Event | any }> = [];
+    // 事件栈 -> 统计页面跳出率
+    // eventStack: Array<{ pathName: string, event: Event | any }> = [];
     // rrwebstack 需要和 webworker 同步
     rrwebStack: any[] = [];
-
     nativeXHRSend?: Function
-
     threshold: number
     // 插件
     plugins: Plugin[] = []
@@ -112,10 +110,7 @@ class WebMonitor extends Monitor {
         // 真正的发送
         const postData = waitLoggerQueue.map(log => ({ ...log, uid: this.uid }));
         this.senderInstance?.post(postData);
-
-
     }
-
 
     initSender(senderType: WebSenderType, senderMethod: SenderMethod, endpoint: string) {
         if (senderType == "beacon") {
@@ -156,3 +151,4 @@ class WebMonitor extends Monitor {
 }
 
 export default WebMonitor
+

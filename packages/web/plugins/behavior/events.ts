@@ -1,5 +1,6 @@
 
 import { Plugin } from "sniper-core"
+import { EventName } from ".."
 import WebMonitor from "../../index"
 
 /*
@@ -8,20 +9,17 @@ import WebMonitor from "../../index"
 */
 
 export class EventsPlugin implements Plugin {
-    instance: WebMonitor
+    monitor: WebMonitor
     eventKeys = ["click", "input", "keydown", "keyup"]
     collectEventHandle = (e: any) => {
         const pathName = location.href;
-        while (this.instance.eventStack.length >= 20) {
-            this.instance.eventStack.shift();
-        }
-        this.instance.eventStack.push({
+        this.monitor.call(EventName.EventHappens, {
             pathName,
             event: e
         })
     }
-    constructor(instance: WebMonitor) {
-        this.instance = instance
+    constructor(monitor: WebMonitor) {
+        this.monitor = monitor
     }
     init() {
 

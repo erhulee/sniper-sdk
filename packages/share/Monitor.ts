@@ -6,7 +6,22 @@ export class Monitor {
     appid: string;
     endpoint: string;
     method: "get" | "post";
-    plugins: Plugin[] = []
+    plugins: Array<Plugin> = []
+
+    // 跨plugin数据传输
+    call(event: string, payload: any) {
+        this.plugins.forEach(plugin => {
+            const eventsRecord = plugin.events || {}
+            const eventKeys = Object.keys(eventsRecord);
+            eventKeys.forEach(key => {
+                if (key == event) {
+                    const callback = eventsRecord[key].bind(plugin);
+                    callback(payload)
+                }
+            })
+
+        })
+    }
     constructor(appid: string, endpoint: string, method: "get" | "post", sample_rate = 0.5) {
         this.appid = appid;
         this.endpoint = endpoint;
