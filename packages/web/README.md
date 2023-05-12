@@ -36,15 +36,19 @@ webmonitor.start();
 - 网络测速：接口测速、资源测速
 - 用户行为：跳出率、PV
 - 页面崩溃：基于 worker 的心跳检测
-- 个性化指标：Long Task、Memory 页面内存、首屏加载时间
+- 个性化指标：Long Task、首屏加载时间
 - 日志容灾：localstorage 备份
 - 插件机制：所有特性都可以自定义选择
 - 支持的 Web 框架：React
+- 日志去除重复
 
 TODO:
+- Memory 页面内存
+- 首屏资源瀑布图
+- console 按 config.level(log / info / waring / error) 收集
 
-- 日志去除重复
-- Fetch 监控
+
+
 
 ## 🎲 具体配置项
 
