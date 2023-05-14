@@ -10,9 +10,6 @@ export class PVPlugin implements Plugin {
     constructor(monitor: WebMonitor) {
         this.monitor = monitor
     }
-    init() {
-
-    }
     run() {
         const _trackPV = this.monitor.trackPV;
         this.monitor.trackPV = () => {
@@ -21,9 +18,6 @@ export class PVPlugin implements Plugin {
             this.monitor.send(log);
             _trackPV.call(this.monitor);
         }
-    }
-    unload() {
-
     }
 }
 

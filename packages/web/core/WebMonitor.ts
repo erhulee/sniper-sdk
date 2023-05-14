@@ -47,7 +47,7 @@ class WebMonitor extends Monitor {
     // 事件栈 -> 统计页面跳出率
     // eventStack: Array<{ pathName: string, event: Event | any }> = [];
     // rrwebstack 需要和 webworker 同步
-    rrwebStack: any[] = [];
+    // rrwebStack: any[] = [];
     nativeXHRSend?: Function
     threshold: number
     // 插件

@@ -2,16 +2,19 @@ import WebMonitor from "web/core/WebMonitor"
 import { Plugin } from "sniper-core"
 import { work_source } from "./webwork"
 import { CrashLogger } from "web/logger"
+import { EventName } from "web/plugins"
 
 export class CrashPlugin implements Plugin {
     monitor: WebMonitor
     worker: Worker | null
+    rrwebQueue: LimitQueue<any>
     constructor(instance: WebMonitor) {
         this.monitor = instance
         this.worker = null
+        this.rrwebQueue = new LimitQueue<any>(100);
     }
     init() {
-        [].unshift
+
     }
     run() {
         const content = new Blob([work_source]);
@@ -30,13 +33,19 @@ export class CrashPlugin implements Plugin {
             worker.postMessage({
                 type: "sync",
                 data,
-                rrwebStack: this.monitor.rrwebStack
+                rrwebStack: this.rrwebQueue
             })
         })
+
     }
     unload() {
         if (this.worker) {
             this.worker.terminate()
+        }
+    }
+    events = {
+        [EventName.RrwebEvent]: (event: any) => {
+            this.rrwebQueue.add(event)
         }
     }
 }
