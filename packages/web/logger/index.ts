@@ -1,30 +1,20 @@
 import WebMonitor from "web/core/WebMonitor";
 import { ResourceType } from "./type";
-
-// export function createBounceRateLogger(monitor: WebMonitor, pathname: string, search: string = "") {
-//     const env = createBaseLogger(monitor);
-//     return {
-//         ...env,
-//         category: "Behavior",
-//         type: "BounceRate",
-//         pathname,
-//         search
-//     }
-// }
-
 const UNKNOWN = "unknown"
 // 父类仅仅作为收集环境
 class BaseLogger {
-    userAgent: string
+    user_agent: string
     dateTime: number
     did: string
     uid: string
     path: string
+    trace_id: string
     constructor() {
-        this.userAgent = navigator.userAgent
+        this.user_agent = navigator.userAgent
         this.dateTime = Date.now().valueOf()
         this.did = (window.__SNIPER__ as WebMonitor).fingerprint || UNKNOWN
         this.uid = (window.__SNIPER__ as WebMonitor).uid || UNKNOWN
+        this.trace_id = (window.__SNIPER__ as WebMonitor).traceId || UNKNOWN
         this.path = window.location.href
     }
 }
@@ -141,6 +131,34 @@ export class LongTaskLogger extends PerformanceBaseLogger {
         this.duration = duration;
         this.eventType = eventType;
         this.eventName = eventName
+    }
+}
+
+export class FPSLogger extends PerformanceBaseLogger {
+    type: "FPS" = "FPS"
+    frame: number
+    constructor(frame: number) {
+        super();
+        this.frame = frame;
+    }
+}
+
+export class MemoryLogger extends PerformanceBaseLogger {
+    type: "Memory" = "Memory"
+    memory_percent: number
+    jsHeapSizeLimit: number
+    totalJSHeapSize: number
+    usedJSHeapSize: number
+    constructor(memory_percent: number, raw_data: {
+        jsHeapSizeLimit: number
+        totalJSHeapSize: number
+        usedJSHeapSize: number
+    }) {
+        super();
+        this.memory_percent = memory_percent;
+        this.jsHeapSizeLimit = raw_data.jsHeapSizeLimit
+        this.totalJSHeapSize = raw_data.totalJSHeapSize
+        this.usedJSHeapSize = raw_data.usedJSHeapSize
     }
 }
 

@@ -1,5 +1,6 @@
+import { XHRSender } from "web/sender/XHRSender";
 import WebMonitor from "..";
-import { XHRSender, BeaconSender } from "./Sender";
+import { BeaconSender } from "web/sender/BeaconSender";
 
 export {
     WebMonitor, XHRSender, BeaconSender

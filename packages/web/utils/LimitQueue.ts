@@ -1,4 +1,4 @@
-class LimitQueue<T> {
+export class LimitQueue<T> {
     private size: number
     private data: T[] = []
     constructor(size: number) {

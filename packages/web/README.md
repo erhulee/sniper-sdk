@@ -43,12 +43,11 @@ webmonitor.start();
 - 日志去除重复
 
 TODO:
+
 - Memory 页面内存
 - 首屏资源瀑布图
 - console 按 config.level(log / info / waring / error) 收集
-
-
-
+- 主要是方便封装跳转方法，在跳转前等待全局埋点请求全部发送完成，再进行跳转，这样同步的方式埋点数据就不会丢，上面说的是埋点请求和跳转同时进行
 
 ## 🎲 具体配置项
 
@@ -68,8 +67,8 @@ type Options = {
 
 | 参数名称      | 作用                        | 默认值                        |
 | ------------- | --------------------------- | ----------------------------- |
-| appid         | 应用标识                     | / 【必填项】                  |
-| waitUidFilled | 是否等待 uid 获取后统一上报   | false                         |
+| appid         | 应用标识                    | / 【必填项】                  |
+| waitUidFilled | 是否等待 uid 获取后统一上报 | false                         |
 | longtask_time | longtask_time               | 50(ms)                        |
 | sample_rate   | 采样频率, 要求 0-1 之间     | 0.5                           |
 | plugins       | 插件列表                    | 下面说明的全部插件            |

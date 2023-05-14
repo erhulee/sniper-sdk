@@ -1,5 +1,4 @@
 import FingerprintJS from '@fingerprintjs/fingerprintjs'
-import { BeaconSender, XHRSender } from "./Sender";
 import { Monitor, Plugin } from "sniper-core"
 import { CrashPlugin, HTTPPlugin, JSErrorPlugin, ResourcePlugin } from "../plugins/stability/index";
 import { LongTimeTaskPlugin, WebVitalsPlugin } from "../plugins/performance/index";
@@ -9,12 +8,16 @@ import { PVPlugin } from 'web/plugins/behavior/pv';
 import { EventsPlugin } from 'web/plugins/behavior/events';
 import { BounceRatePlugin } from 'web/plugins/behavior/bounce-rate';
 import { encode, decode } from 'js-base64';
+import { XHRSender } from 'web/sender/XHRSender';
+import { BeaconSender } from 'web/sender/BeaconSender';
+import { FPSPlugin } from 'web/plugins/performance/fps';
+import { nanoid } from "nanoid"
+import { MemoryPlugin } from 'web/plugins/performance/memory';
 const DEFAULT_LONGTASK_TIME = 50;
 const DEFAULT_ENDPOINT = "https://bdul0j.laf.dev/logger"
 type WebSenderType = "xhr" | "beacon";
 type SenderMethod = "post" | "get"
 type SenderOption = {
-
     endpoint?: string
 } & ({
     method: "post",
@@ -40,14 +43,10 @@ class WebMonitor extends Monitor {
     // did -> 浏览器指纹
     fingerprint: string = "unknown";
     waitUidFilled: boolean
-    // uid -> 运行时注入，存在 uid 为空的情况，
-    uid?: string
-    // 发送器实例 sender 处理存储/压缩之类的具体逻辑，plugin 在发送数据的时候，会将后续控制权交给 sender 
-    senderInstance?: Sender<WebMonitor>;
-    // 事件栈 -> 统计页面跳出率
-    // eventStack: Array<{ pathName: string, event: Event | any }> = [];
-    // rrwebstack 需要和 webworker 同步
-    // rrwebStack: any[] = [];
+    uid?: string  // 运行时注入，存在 uid 为空的情况，
+    senderInstance?: Sender<WebMonitor>; // 处理存储/压缩之类的具体逻辑
+    traceId: string;   // 会话id
+
     nativeXHRSend?: Function
     threshold: number
     // 插件
@@ -76,6 +75,7 @@ class WebMonitor extends Monitor {
         this.threshold = threshold
         this.waitUidFilled = waitUidFilled
         this.longtask_time = longtask_time
+        this.traceId = nanoid();
         getDid().then(did => this.fingerprint = did)
         this.initSender(senderType, method, endpoint || DEFAULT_ENDPOINT);
         this.initPlugins(options.plugins);
@@ -89,7 +89,6 @@ class WebMonitor extends Monitor {
             })
             return;
         }
-
         if (data == null) return;
         // 暂定频控
         if (Math.random() > this.sample_rate) return;
@@ -116,7 +115,7 @@ class WebMonitor extends Monitor {
         if (senderType == "beacon") {
             this.senderInstance = new BeaconSender(endpoint, this);
         } else {
-            this.senderInstance = new XHRSender<(any & { appid: string })>(endpoint, this, senderMethod)
+            this.senderInstance = new XHRSender(endpoint, this as any, senderMethod) as any
         }
     }
 
@@ -130,7 +129,9 @@ class WebMonitor extends Monitor {
         new RrwebPlugin(this),
         new PVPlugin(this),
         new EventsPlugin(this),
-        new BounceRatePlugin(this)
+        new BounceRatePlugin(this),
+        new FPSPlugin(this),
+        new MemoryPlugin(this)
     ]) {
         this.plugins = plugins;
     }

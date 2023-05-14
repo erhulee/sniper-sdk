@@ -2,6 +2,7 @@ import WebMonitor from "web/core/WebMonitor";
 import { Plugin } from "sniper-core"
 import { JSErrorLogger, PromiseErrorLogger } from "web/logger";
 import { EventName } from "web/plugins";
+import { LimitQueue } from "web/utils/LimitQueue";
 
 export class JSErrorPlugin implements Plugin {
     monitor: WebMonitor;
@@ -38,7 +39,7 @@ export class JSErrorPlugin implements Plugin {
     }
     events = {
         [EventName.RrwebEvent]: (event: any) => {
-
+            this.rrwebQueue.add(event);
         }
     }
 

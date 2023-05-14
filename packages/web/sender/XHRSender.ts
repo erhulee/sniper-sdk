@@ -1,10 +1,8 @@
-// TODO: 这里关于 threshold 还有问题 ~~
-import WebMonitor from "./WebMonitor";
 import { Sender } from "sniper-core/Sender"
-function isStatusOk(status: number) {
-    return !(status >= 400 && status < 600)
-}
-
+import { WebMonitor } from "web/core";
+import { isStatusOk } from "web/utils/isStatusOk";
+const id_creator = confirmId();
+const KEY = "__Web_Monitor_List__"
 function* confirmId() {
     let i = 0;
     while (1) {
@@ -13,22 +11,9 @@ function* confirmId() {
     }
 }
 
-const id_creator = confirmId();
-const KEY = "__Web_Monitor_List__"
-class BeaconSender<Report> implements Sender<WebMonitor>{
-    endpoint: string;
-    instance: WebMonitor;
-    method: "post" = "post";
-    constructor(endpoint: string, instance: WebMonitor) {
-        this.endpoint = endpoint;
-        this.instance = instance;
-    }
-    post(data: Report): void {
-        window.navigator.sendBeacon(this.endpoint, JSON.stringify(data));
-    }
-}
 
-class XHRSender<Report extends { appid: string, confirm_id?: string }> implements Sender<WebMonitor>{
+type Report = any;
+export class XHRSender implements Sender<WebMonitor>{
     endpoint: string;
     instance: WebMonitor;
     method: "post" | "get";
@@ -97,7 +82,3 @@ class XHRSender<Report extends { appid: string, confirm_id?: string }> implement
     }
 }
 
-export {
-    BeaconSender,
-    XHRSender
-}

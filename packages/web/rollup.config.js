@@ -1,7 +1,7 @@
 import typescript from "rollup-plugin-typescript2"
 import babel from "rollup-plugin-babel"
 import alias from "@rollup/plugin-alias"
-import npm from "rollup-plugin-node-resolve"
+import nodeResolve from "rollup-plugin-node-resolve"
 import path from "path"
 import { fileURLToPath } from 'url'
 
@@ -22,7 +22,9 @@ export default {
                     { find: "web",   replacement:  path.resolve(__dirnameNew, "./")},
                 ]
             }),
-            npm(),
+            nodeResolve({
+                browser: true
+            }),
             typescript({
                 tsconfig: "tsconfig.json"
             }),

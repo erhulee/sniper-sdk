@@ -3,6 +3,7 @@ import { Plugin } from "sniper-core"
 import { work_source } from "./webwork"
 import { CrashLogger } from "web/logger"
 import { EventName } from "web/plugins"
+import { LimitQueue } from "web/utils/LimitQueue"
 
 export class CrashPlugin implements Plugin {
     monitor: WebMonitor
