@@ -2,7 +2,7 @@
 
 # Sniper-SDK
 
-前端监控 SDK 【毕设项目，还在迭代】
+前端监控 SDK 【毕设项目，还在迭代（四处抄袭）】
 
 [![version](https://img.shields.io/npm/v/sniper-web?style=for-the-badge)](https://www.npmjs.com/package/sniper-web)
 [![license](https://img.shields.io/npm/l/sniper-web?style=for-the-badge)](https://github.com/erhulee/sniper-sdk/blob/main/LICENSE)
@@ -41,10 +41,10 @@ webmonitor.start();
 - 插件机制：所有特性都可以自定义选择
 - 支持的 Web 框架：React
 - 日志去除重复
+- Memory 页面内存
+- FPS
 
 TODO:
-
-- Memory 页面内存
 - 首屏资源瀑布图
 - console 按 config.level(log / info / waring / error) 收集
 - 主要是方便封装跳转方法，在跳转前等待全局埋点请求全部发送完成，再进行跳转，这样同步的方式埋点数据就不会丢，上面说的是埋点请求和跳转同时进行
@@ -69,7 +69,7 @@ type Options = {
 | ------------- | --------------------------- | ----------------------------- |
 | appid         | 应用标识                    | / 【必填项】                  |
 | waitUidFilled | 是否等待 uid 获取后统一上报 | false                         |
-| longtask_time | longtask_time               | 50(ms)                        |
+| longtask_time | longtask_time               | 50(ms)                      |
 | sample_rate   | 采样频率, 要求 0-1 之间     | 0.5                           |
 | plugins       | 插件列表                    | 下面说明的全部插件            |
 | threshold     | 统一日志上报数量            | 20                            |
@@ -90,7 +90,8 @@ type Options = {
 | WebVitalsPlugin    | webvital 指标检测  |                                                                     |
 | EventsPlugin       | 用户行为数据记录   | 不会上报，作为其他 plugin 的数据源，会把数据存到 Monitor.eventStack |
 | BounceRatePlugin   | 页面跳出率         | 页面跳出率，依赖 Monitor.eventStack                                 |
-
+| FPSPlugin   | FPS         | requestAnimation 手工计算（stata.js）                             |
+| MemoryPlugin   | 使用内存      | 数据来自 performance.memory  （stata.js）                                 |
 注意: 如果有自定义的插件，例如 CustomPlugin, 需要将默认的插件全部 import 一遍
 
 ```typescript
